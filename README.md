@@ -1,5 +1,8 @@
 # dns-tools
+#### built with cursor ai
+SW Eng is changing. This is my first mini project using [cursor ai](https://www.cursor.com/). I'm sure there will be bugs and issues. I'm sure it's not perfect. But cursor is the future.
 
+## what is this?
 This is a simple tool to help with DNS management. It allows you to check the records for a domain, and compare different name servers. It was created to assist with the migration of domains from one registrar to another.
 
 Generally speaking, when migrating domains from one registrar to another, you want to make sure that the DNS records are correctly transferred. I could not find any free tools to do this, so I made my own. I was stuck digging through existing records, looking for the ones that were not present in the new registrar.
