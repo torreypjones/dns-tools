@@ -1,3 +1,38 @@
+# dns-tools
+
+This is a simple tool to help with DNS management. It allows you to check the records for a domain, and compare different name servers. It was created to assist with the migration of domains from one registrar to another.
+
+Generally speaking, when migrating domains from one registrar to another, you want to make sure that the DNS records are correctly transferred. I could not find any free tools to do this, so I made my own. I was stuck digging through existing records, looking for the ones that were not present in the new registrar.
+
+Migration of a domain typically happens using the following process:
+
+1. Domain owner to provide the WHOIS information for us to have on record with new registries
+2. On losing Registrar remove DNSSEC from domain
+3. Provide AXFR files to be rebuilt at new registrar. I found that not all registrars provide this ability, and you're stuck finding this info yourself. \<cough\>godaddy\<\/cough\>. Only after I created this did I find that Google Cloud DNS using `gcloud dns record-sets export`. 
+
+4. Update Nameservers at losing registrar to new registrar after zones are built. Before you do this, you want to compare old name servers to new name servers. This is where this tool comes in. 
+5. Have losing registrar unlock domains and provide auth codes
+6. New registrar transfers domains
+7. New registrar locks the super most valuable domains at the registry - instructions to follow in separate email
+8. New registrar can resign DNSSEC
+
+
+
+
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+
+
+
+# stock nextjs project info below
+
+
+
+
 This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
 ## Getting Started
