@@ -1,101 +1,182 @@
-import Image from "next/image";
+'use client'
+import { useState } from 'react'
+import { Button } from "@/components/ui/button"
+import { Textarea } from "@/components/ui/textarea"
+import { ClipboardCopy, Download, Loader2 } from 'lucide-react'
+import { sortDNSRecords, dnsLookup, generateDNSDiff } from './utils/dnsUtils'
+import { DomainInput } from './components/DomainInput'
+import { RecordTypeSelect } from './components/RecordTypeSelect'
+import { NameserverSelect } from './components/NameserverSelect'
+import { CompareSwitch } from './components/CompareSwitch'
+import { ResultsDisplay } from './components/ResultsDisplay'
+import pLimit from 'p-limit';
 
-export default function Home() {
+export default function DNSTools() {
+  const [domains, setDomains] = useState('')
+  const [recordType, setRecordType] = useState('A')
+  const [nameserver1, setNameserver1] = useState('8.8.8.8')
+  // const [nameserver2, setNameserver2] = useState('Cloudflare')
+  const [nameserver2, setNameserver2] = useState('162.159.8.185')
+  const [compareMode, setCompareMode] = useState(false)
+  const [results, setResults] = useState<any[]>([])
+  const [error, setError] = useState('')
+  const [isLoading, setIsLoading] = useState(false)
+  const [progress, setProgress] = useState({ current: 0, total: 0 })
+
+  const handleLookup = async () => {
+    setError('')
+    setIsLoading(true)
+    setResults([]) // Clear previous results
+    const domainList = domains.split('\n').map(d => d.trim()).filter(d => d);
+    
+    if (domainList.length === 0) {
+      setError('Please enter at least one domain');
+      setIsLoading(false)
+      return;
+    }
+
+    const totalLookups = compareMode ? domainList.length * 2 : domainList.length;
+    setProgress({ current: 0, total: totalLookups })
+
+    try {
+      const limit = pLimit(4); // Limit to 4 concurrent requests
+
+      const lookupPromises = domainList.flatMap(domain => [
+        limit(() => dnsLookupWithProgress(domain, recordType, nameserver1)),
+        ...(compareMode ? [limit(() => dnsLookupWithProgress(domain, recordType, nameserver2))] : [])
+      ]);
+
+      const lookupResults = await Promise.all(lookupPromises);
+
+      const newResults = domainList.map((domain, index) => {
+        const result1 = lookupResults[index * (compareMode ? 2 : 1)];
+        result1.results = sortDNSRecords(result1.results, recordType);
+
+        if (compareMode) {
+          const result2 = lookupResults[index * 2 + 1];
+          result2.results = sortDNSRecords(result2.results, recordType);
+          const diff = generateDNSDiff(
+            { [recordType]: result1.results },
+            { [recordType]: result2.results }
+          );
+          return { domain, results: [result1, result2], diff };
+        }
+
+        return { domain, results: [result1] };
+      });
+
+      setResults(newResults);
+    } catch (error) {
+      setError('An error occurred during the DNS lookup')
+    } finally {
+      setIsLoading(false)
+      setProgress({ current: 0, total: 0 })
+    }
+  }
+
+  // Update progress after each individual lookup
+  const dnsLookupWithProgress = async (domain: string, recordType: string, nameserver: string) => {
+    const result = await dnsLookup(domain, recordType, nameserver);
+    setProgress(prev => ({ ...prev, current: prev.current + 1 }));
+    return result;
+  }
+
+  const copyResults = () => {
+    const text = results.map(r => 
+      r.results.map(res => `${res.domain} (${res.recordType}):\n${res.results.map(record => `  ${record.type}: ${record.value}`).join('\n')}`).join('\n\n')
+    ).join('\n\n')
+    navigator.clipboard.writeText(text)
+  }
+
+  const exportCSV = () => {
+    const csv = [
+      ['Domain', 'Record Type', 'Nameserver', 'Result Type', 'Result Value'],
+      ...results.flatMap(r => 
+        r.results.flatMap(res => 
+          res.results.map(record => [res.domain, res.recordType, res.nameserver, record.type, record.value])
+        )
+      )
+    ].map(row => row.join(',')).join('\n')
+
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' })
+    const link = document.createElement('a')
+    if (link.download !== undefined) {
+      const url = URL.createObjectURL(blob)
+      link.setAttribute('href', url)
+      link.setAttribute('download', 'dns_results.csv')
+      link.style.visibility = 'hidden'
+      document.body.appendChild(link)
+      link.click()
+      document.body.removeChild(link)
+    }
+  }
+
   return (
-    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-      <main className="flex flex-col gap-8 row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="https://nextjs.org/icons/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="list-inside list-decimal text-sm text-center sm:text-left font-[family-name:var(--font-geist-mono)]">
-          <li className="mb-2">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] px-1 py-0.5 rounded font-semibold">
-              app/page.tsx
-            </code>
-            .
-          </li>
-          <li>Save and see your changes instantly.</li>
-        </ol>
+    <div className="min-h-screen bg-gray-50 p-6">
+      <div className="max-w-7xl mx-auto bg-white rounded-xl shadow-sm p-6 space-y-6 transition-all duration-300">
+        <h1 className="text-3xl font-bold text-gray-800">DNS Tools</h1>
+        
+        <div className="space-y-4">
+          <DomainInput domains={domains} setDomains={setDomains} />
+          <div className="flex flex-wrap gap-4">
+            <RecordTypeSelect recordType={recordType} setRecordType={setRecordType} />
+            <NameserverSelect label="Nameserver 1" value={nameserver1} onChange={setNameserver1} />
+            {compareMode && (
+              <NameserverSelect label="Nameserver 2" value={nameserver2} onChange={setNameserver2} />
+            )}
+          </div>
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="https://nextjs.org/icons/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:min-w-44"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
+          <CompareSwitch compareMode={compareMode} setCompareMode={setCompareMode} />
+
+          <div className="flex items-center space-x-4">
+            <Button 
+              onClick={handleLookup} 
+              className="w-full sm:w-auto relative" 
+              disabled={isLoading}
+            >
+              {isLoading ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Looking up...
+                </>
+              ) : (
+                'Perform DNS Lookup'
+              )}
+            </Button>
+            {isLoading && (
+              <div className="text-sm text-gray-500">
+                Processing {progress.current} of {progress.total} domains
+              </div>
+            )}
+          </div>
+
+          {isLoading && (
+            <div className="w-full bg-gray-200 rounded-full h-2.5 dark:bg-gray-700">
+              <div 
+                className="bg-blue-600 h-2.5 rounded-full transition-all duration-300 ease-in-out" 
+                style={{ width: `${(progress.current / progress.total) * 100}%` }}
+              ></div>
+            </div>
+          )}
+
+          {error && <div className="text-red-500 font-semibold">{error}</div>}
+
+          <ResultsDisplay results={results} compareMode={compareMode} />
+
+          {results.length > 0 && (
+            <div className="flex flex-wrap gap-2">
+              <Button onClick={copyResults} className="flex items-center">
+                <ClipboardCopy className="mr-2 h-4 w-4" />
+                Copy Results
+              </Button>
+              <Button onClick={exportCSV} className="flex items-center">
+                <Download className="mr-2 h-4 w-4" />
+                Export as CSV
+              </Button>
+            </div>
+          )}
         </div>
-      </main>
-      <footer className="row-start-3 flex gap-6 flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="https://nextjs.org/icons/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="https://nextjs.org/icons/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="https://nextjs.org/icons/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
+      </div>
     </div>
-  );
+  )
 }
