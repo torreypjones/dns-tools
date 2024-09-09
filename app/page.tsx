@@ -39,7 +39,7 @@ export default function DNSTools() {
     setProgress({ current: 0, total: totalLookups })
 
     try {
-      const limit = pLimit(4); // Limit to 4 concurrent requests
+      const limit = pLimit(8); // Limit to 4 concurrent requests
 
       const lookupPromises = domainList.flatMap(domain => [
         limit(() => dnsLookupWithProgress(domain, recordType, nameserver1)),
