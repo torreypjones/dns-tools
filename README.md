@@ -19,8 +19,25 @@ Migration of a domain typically happens using the following process:
 7. New registrar locks the super most valuable domains at the registry - instructions to follow in separate email
 8. New registrar can resign DNSSEC
 
+## Need custom name servers?
+add to NameServerSelect.tsx
+
+## Known Issue
+CNAME lookups are sometimes inconsistent. Meaning that sometimes if you lookup a CNAME you get multiple entries returned. Sometimes this is due to a CNAME lookup also returning an A record, sometimes this is due to some reason that I didnt dig into enough to figure out.  The current state (Sept 2024) was good enough for what I was doing.  If someone wants to dig into it and submit a PR, that would be fantastic, or not.
+
+## Screenshots
+![image](https://github.com/user-attachments/assets/5f9d38b7-27d2-4a30-ac24-0e1b64d2b205)
+
+![image](https://github.com/user-attachments/assets/0028028a-e18a-4487-9330-d8439ddfa279)
 
 
+
+![image](https://github.com/user-attachments/assets/055bbf69-ea12-445f-98a4-d946bc9f4f51)
+
+A Record Compare of www.instagram.com and www.facebook.com: ![image](https://github.com/user-attachments/assets/e2b496e1-9c65-459f-9e39-884b996a622b)
+
+
+ANY Record Compare of www.instagram.com and www.facebook.com: ![image](https://github.com/user-attachments/assets/722f1194-1873-44e0-a6f4-578df0347663)
 
 <br>
 <br>
