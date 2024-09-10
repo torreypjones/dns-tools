@@ -27,7 +27,12 @@ const nameservers = [
   { name: 'ns4.markmonitor.com', ip: '162.159.11.100' },
   { name: 'ns5.markmonitor.com', ip: '162.159.12.75' },
   { name: 'ns6.markmonitor.com', ip: '162.159.13.131' },
-  { name: 'ns7.markmonitor.com', ip: '162.159.14.2' }
+  { name: 'ns7.markmonitor.com', ip: '162.159.14.2' },
+  { name: 'star-mini.c10r.facebook.com.', ip: 'star-mini.c10r.facebook.com.' },
+  { name: 'z-p42-instagram.c10r.instagram.com.', ip: 'z-p42-instagram.c10r.instagram.com.' },
+  { name: 'ns-440.awsdns-55.com.', ip: 'ns-440.awsdns-55.com.' },
+  { name: 'ns-2048.awsdns-64.com', ip: 'ns-2048.awsdns-64.com' },
+  { name: 'ns-2049.awsdns-65.net', ip: 'ns-2049.awsdns-65.net' },
 ]
 
 export function NameserverSelect({ label, value, onChange }: { label: string, value: string, onChange: (value: string) => void }) {
