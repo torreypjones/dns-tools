@@ -34,6 +34,9 @@ CNAME lookups are sometimes inconsistent. Meaning that sometimes if you lookup a
 
 ![image](https://github.com/user-attachments/assets/055bbf69-ea12-445f-98a4-d946bc9f4f51)
 
+Multiple domains with up to 8 concurrent requests: ![image](https://github.com/user-attachments/assets/7a299dbc-3dec-4d56-8ab7-82644939c765)
+
+
 A Record Compare of www.instagram.com and www.facebook.com: ![image](https://github.com/user-attachments/assets/e2b496e1-9c65-459f-9e39-884b996a622b)
 
 
