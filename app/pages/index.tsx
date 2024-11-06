@@ -1,10 +1,13 @@
 import { dnsLookup } from '../utils/dnsUtils';
+import { useState } from 'react';
 
-// ... existing code ...
+const [domain, setDomain] = useState('');
+const [recordType, setRecordType] = useState('A');
+const [nameserver, setNameserver] = useState('');
+const [results, setResults] = useState<any[]>([]);
 
 const performLookup = async () => {
-  const results = dnsLookup(domain, recordType, nameserver);
-  setResults(results);
+  if (!domain || !recordType || !nameserver) return;
+  const lookupResults = await dnsLookup(domain, recordType, nameserver);
+  setResults(lookupResults.results);
 };
-
-// ... rest of the file ...

@@ -11,6 +11,39 @@ import { CompareSwitch } from './components/CompareSwitch'
 import { ResultsDisplay } from './components/ResultsDisplay'
 import pLimit from 'p-limit';
 
+// Update the DNSRecord type to make required fields non-optional
+type DNSRecord = {
+  type: string;
+  value: string;
+  name: string;
+  ttl: number;
+  class: string;
+  address?: string;
+  preference?: number;
+  exchange?: string;
+  [key: string]: any;
+}
+
+type DNSResult = {
+  domain: string;
+  recordType: string;
+  nameserver: string;
+  results: DNSRecord[];
+}
+
+type DomainResult = {
+  domain: string;
+  results: DNSResult[];
+  diff?: Record<string, any>;
+}
+
+// Add this new type for ResultsDisplay props
+type ResultsDisplayProps = {
+  results: DomainResult[];
+  compareMode: boolean;
+  selectedRecordType: string;
+}
+
 export default function DNSTools() {
   const [domains, setDomains] = useState('')
   const [recordType, setRecordType] = useState('A')
@@ -18,7 +51,7 @@ export default function DNSTools() {
   // const [nameserver2, setNameserver2] = useState('Cloudflare')
   const [nameserver2, setNameserver2] = useState('162.159.8.185')
   const [compareMode, setCompareMode] = useState(false)
-  const [results, setResults] = useState<any[]>([])
+  const [results, setResults] = useState<DomainResult[]>([])
   const [error, setError] = useState('')
   const [isLoading, setIsLoading] = useState(false)
   const [progress, setProgress] = useState({ current: 0, total: 0 })
@@ -49,20 +82,20 @@ export default function DNSTools() {
       const lookupResults = await Promise.all(lookupPromises);
 
       const newResults = domainList.map((domain, index) => {
-        const result1 = lookupResults[index * (compareMode ? 2 : 1)];
+        const result1 = lookupResults[index * (compareMode ? 2 : 1)] as DNSResult;
         result1.results = sortDNSRecords(result1.results, recordType);
 
         if (compareMode) {
-          const result2 = lookupResults[index * 2 + 1];
+          const result2 = lookupResults[index * 2 + 1] as DNSResult;
           result2.results = sortDNSRecords(result2.results, recordType);
           const diff = generateDNSDiff(
             { [recordType]: result1.results },
             { [recordType]: result2.results }
           );
-          return { domain, results: [result1, result2], diff };
+          return { domain, results: [result1, result2], diff } as DomainResult;
         }
 
-        return { domain, results: [result1] };
+        return { domain, results: [result1] } as DomainResult;
       });
 
       setResults(newResults);
@@ -161,7 +194,11 @@ export default function DNSTools() {
 
           {error && <div className="text-red-500 font-semibold">{error}</div>}
 
-          <ResultsDisplay results={results} compareMode={compareMode} />
+          <ResultsDisplay 
+            results={results} 
+            compareMode={compareMode} 
+            selectedRecordType={recordType}
+          />
 
           {results.length > 0 && (
             <div className="flex flex-wrap gap-2">

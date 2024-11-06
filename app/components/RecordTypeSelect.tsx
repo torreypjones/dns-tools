@@ -3,7 +3,14 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 
 const recordTypes = ['A', 'AAAA', 'MX', 'TXT', 'NS', 'CNAME', 'SOA', 'ANY']
 
-export function RecordTypeSelect({ recordType, setRecordType }) {
+type RecordType = typeof recordTypes[number]
+
+interface RecordTypeSelectProps {
+  recordType: RecordType
+  setRecordType: (value: RecordType) => void
+}
+
+export function RecordTypeSelect({ recordType, setRecordType }: RecordTypeSelectProps) {
   return (
     <div className="w-full sm:w-auto">
       <Label htmlFor="recordType" className="text-gray-700">Record Type</Label>
