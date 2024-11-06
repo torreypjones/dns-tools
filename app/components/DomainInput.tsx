@@ -1,7 +1,13 @@
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 
-export function DomainInput({ domains, setDomains }) {
+export function DomainInput({ 
+  domains, 
+  setDomains 
+}: {
+  domains: string;
+  setDomains: (value: string) => void;
+}) {
   return (
     <div>
       <Label htmlFor="domains" className="text-gray-700">Domain(s)</Label>

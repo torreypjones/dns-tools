@@ -1,3 +1,8 @@
+export type DnsLookupResult = {
+  records: string[];
+  error?: string;
+};
+
 export type DnsLookupFunction = (
   domain: string,
   recordType: string,

@@ -99,6 +99,27 @@ const DNS_CLASSES: Record<number, string> = {
   254: "NONE", // Used in dynamic update operations
   255: "ANY", // Wildcard match
 };
+
+interface DNSRecord {
+  name: string;
+  ttl: number;
+  type: string;
+  class: string;
+  address?: string;
+  target?: string;
+  preference?: number;
+  exchange?: string;
+  text?: string;
+  mname?: string;
+  rname?: string;
+  serial?: number;
+  refresh?: number;
+  retry?: number;
+  expire?: number;
+  minimum?: number;
+  value?: string | any;
+}
+
 export async function GET(request: NextRequest) {
   console.log("DNS lookup API route called, getting params");
   let searchParams;
@@ -176,8 +197,10 @@ export async function GET(request: NextRequest) {
 
     // Remove duplicates
     const uniqueResults = Array.from(
-      new Set(formattedResults.map((r) => JSON.stringify(r)))
-    ).map((r) => JSON.parse(r));
+      new Set(
+        formattedResults.map((r: DNSRecord) => JSON.stringify(r))
+      ) as Set<string>
+    ).map((r: string) => JSON.parse(r) as DNSRecord);
 
     return NextResponse.json({
       domain,

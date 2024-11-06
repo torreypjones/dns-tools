@@ -7,6 +7,7 @@ const nameservers = [
   { name: 'ns47.domaincontrol.com', ip: 'ns47.domaincontrol.com' },
   { name: 'ns-cloud-c1.googledomains.com', ip: 'ns-cloud-c1.googledomains.com' },
   { name: 'ns-cloud-d1.googledomains.com', ip: 'ns-cloud-d1.googledomains.com' },
+  { name: 'ns-cloud-e1.googledomains.com', ip: 'ns-cloud-e1.googledomains.com' },
   { name: 'ns48.domaincontrol.com', ip: 'ns48.domaincontrol.com' },
   { name: 'ns-cloud-c2.googledomains.com', ip: 'ns-cloud-c2.googledomains.com' },
   { name: 'ns-cloud-c3.googledomains.com', ip: 'ns-cloud-c3.googledomains.com' },
