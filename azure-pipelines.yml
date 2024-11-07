@@ -46,7 +46,7 @@ stages:
     steps:
     - task: AzureResourceGroupDeployment@2
       inputs:
-        azureSubscription: $(dockerRegistryServiceConnection)
+        # azureSubscription: $(dockerRegistryServiceConnection)
         resourceGroupName: $(resourceGroupName)
         templateLocation: Linked artifact
         csmFile: 'dns-tools-test2.json'
