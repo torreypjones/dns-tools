@@ -39,3 +39,21 @@ stages:
         containerRegistry: $(dockerRegistryServiceConnection)
         tags: |
           $(tag)
+          latest
+  # add new job that deploy to container app
+  - job: Deploy
+    displayName: Deploy
+    steps:
+    - task: AzureResourceGroupDeployment@2
+      inputs:
+        azureSubscription: $(dockerRegistryServiceConnection)
+        resourceGroupName: $(resourceGroupName)
+        templateLocation: Linked artifact
+        csmFile: 'dns-tools-test2.json'
+        csmParametersFile: ''  # Leave empty if not using a parameters file
+        overrideParameters: |
+          location=eastus
+          containerRegistryName=dnstools
+          containerImage=$(containerRegistry)/$(imageRepository):$(tag)
+          minReplica=0
+          maxReplica=1
