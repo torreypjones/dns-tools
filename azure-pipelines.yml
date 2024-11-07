@@ -19,9 +19,9 @@ variables:
   # Agent VM image name
   vmImageName: 'ubuntu-latest'
 
-  pool:
-    vmImage: ubuntu-latest
-    name: myprivate-pool
+pool:
+  name: myprivate-pool
+  vmImage: $(vmImageName)
 
 stages:
 - stage: Build
@@ -29,8 +29,6 @@ stages:
   jobs:
   - job: Build
     displayName: Build
-    pool:
-      vmImage: $(vmImageName)
     steps:
     - task: Docker@2
       displayName: Build and push an image to container registry
