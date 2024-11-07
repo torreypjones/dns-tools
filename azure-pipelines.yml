@@ -1,3 +1,4 @@
+name: dnstools-test2-pipeline
 # Docker
 # Build and push an image to Azure Container Registry
 # https://docs.microsoft.com/azure/devops/pipelines/languages/docker
@@ -47,19 +48,31 @@ stages:
           latest
   # add new job that deploy to container app
   - job: Deploy
-    displayName: Deploy
+    displayName: Deploy dnstools-test2
     dependsOn: Build  # Ensure Deploy runs after Build
     steps:
-    - task: AzureResourceGroupDeployment@2
-      inputs:
-        # azureSubscription: $(dockerRegistryServiceConnection)
-        resourceGroupName: $(resourceGroupName)
-        templateLocation: Linked artifact
-        csmFile: 'dns-tools-test2.json'
-        csmParametersFile: ''  # Leave empty if not using a parameters file
-        overrideParameters: |
-          location=eastus
-          containerRegistryName=dnstools
-          containerImage=$(containerRegistry)/$(imageRepository):$(tag)
-          minReplica=0
-          maxReplica=1
+      - task: AzureContainerApps@1
+        inputs:
+          azureSubscription: 'Azure subscription 1(98cf1ccb-3209-459c-a9f3-98ffb07edab5)'
+          acrName: '$(dockerRegistryServiceConnection)'
+          dockerfilePath: '$(dockerfilePath)'
+          imageToBuild: '$(containerRegistry)/$(imageRepository):$(tag)'
+          imageToDeploy: '$(containerRegistry)/$(imageRepository):$(tag)'
+          containerAppName: 'dns-tools-test2'
+          resourceGroup: 'Example_pipelines'
+          containerAppEnvironment: 'env-ghycbbyvsm6mo'
+          targetPort: '3000'
+          location: 'eastus'
+      - task: AzureResourceGroupDeployment@2
+        inputs:
+          # azureSubscription: $(dockerRegistryServiceConnection)
+          resourceGroupName: $(resourceGroupName)
+          templateLocation: Linked artifact
+          csmFile: 'dns-tools-test2.json'
+          csmParametersFile: ''  # Leave empty if not using a parameters file
+          overrideParameters: |
+            location=eastus
+            containerRegistryName=dnstools
+            containerImage=$(containerRegistry)/$(imageRepository):$(tag)
+            minReplica=0
+            maxReplica=1
