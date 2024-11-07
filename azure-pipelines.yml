@@ -43,6 +43,7 @@ stages:
   # add new job that deploy to container app
   - job: Deploy
     displayName: Deploy
+    dependsOn: Build  # Ensure Deploy runs after Build
     steps:
     - task: AzureResourceGroupDeployment@2
       inputs:
