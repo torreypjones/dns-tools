@@ -54,7 +54,8 @@ stages:
         containerAppEnvironment: 'env-ghycbbyvsm6mo'
         # runtimeStack: 'nodejs'
         targetPort: '3000'
-        ingress: '80'
+        ingress: 'external'
+        location: 'eastus'
 
 - stage: Build_again
   displayName: generic build and push stage
