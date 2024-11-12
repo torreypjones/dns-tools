@@ -25,6 +25,8 @@ variables:
   # Agent VM image name
   vmImageName: 'ubuntu-latest'
 
+  resourceGroupName: 'Example_pipelines'
+
 pool:
   name: myprivate-pool
   vmImage: $(vmImageName)
@@ -32,11 +34,11 @@ pool:
 
 
 stages:
-- stage: Build
-  displayName: Build image with AzurecontainerApps@1
+- stage: Build1
+  displayName: Works Build and deploy specific image with AzurecontainerApps@1
   jobs:
-  - job: Build
-    displayName: Build
+  - job: Build_Deploy
+    displayName: Build and deploy
     pool:
       name: myprivate-pool
       vmImage: ubuntu-latest
@@ -57,11 +59,40 @@ stages:
         ingress: 'external'
         location: 'eastus'
 
-- stage: Build_again
+- stage: Build2
+  displayName: Deploy image with no image AzurecontainerApps@1
+  jobs:
+  - job: Build_Deploy2
+    displayName: Build and deploy2
+    pool:
+      name: myprivate-pool
+      vmImage: ubuntu-latest
+    steps:
+    - task: AzureContainerApps@1
+      inputs:
+        appSourcePath: '.'
+        azureSubscription: 'Azure subscription 1(1)(98cf1ccb-3209-459c-a9f3-98ffb07edab5)'
+        acrName: 'dnstools'
+        dockerfilePath: './Dockerfile'
+        # imageToBuild: 'dnstools.azurecr.io/dnstools:latest'
+        # imageToDeploy: 'dnstools.azurecr.io/dnstools:latest'
+        containerAppName: 'app-ghycbbyvsm6mo'
+        resourceGroup: 'Example_pipelines'
+        containerAppEnvironment: 'env-ghycbbyvsm6mo'
+        # runtimeStack: 'nodejs'
+        targetPort: '3000'
+        ingress: 'external'
+        location: 'eastus'
+
+
+- stage: Build3
   displayName: generic build and push stage
   jobs:
   - job: Build
     displayName: Build dnstools-test2
+    pool:
+      name: myprivate-pool
+      vmImage: ubuntu-latest
     steps:
     - task: Docker@2
       displayName: Build and push an image to container registry
@@ -73,6 +104,24 @@ stages:
         tags: |
           $(tag)
           latest
+    # https://learn.microsoft.com/en-us/azure/devops/pipelines/tasks/deploy/azure-resource-group-deployment?view=azure-devops
+    - task: AzureResourceGroupDeployment@2
+      displayName: Deploy with AzureResourceGroupDeployment@2
+      inputs:
+        # azureSubscription: $(dockerRegistryServiceConnection)
+        azureSubscription: 'Azure subscription 1(1)(98cf1ccb-3209-459c-a9f3-98ffb07edab5)'
+        resourceGroupName: $(resourceGroupName)
+        templateLocation: Linked artifact
+        csmFile: './dns-tools-test2.json'
+        csmParametersFile: ''  # Leave empty if not using a parameters file
+        overrideParameters: |
+          location=eastus
+          containerRegistryName=dnstools
+          containerImage=$(containerRegistry)/$(imageRepository):$(tag)
+          minReplica=0
+          maxReplica=1
+
+ 
   # add new job that deploy to container app
   # - job: Deploy
   #   displayName: Deploy dnstools-test2
