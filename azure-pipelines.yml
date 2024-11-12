@@ -49,10 +49,10 @@ stages:
         dockerfilePath: './Dockerfile'
         imageToBuild: 'dnstools.azurecr.io/dnstools:latest'
         imageToDeploy: 'dnstools.azurecr.io/dnstools:latest'
-        containerAppName: 'dns-tools'
+        containerAppName: 'app-ghycbbyvsm6mo'
         resourceGroup: 'Example_pipelines'
-        containerAppEnvironment: 'app-ghycbbyvsm6mo'
-        runtimeStack: 'nodejs'
+        containerAppEnvironment: 'env-ghycbbyvsm6mo'
+        # runtimeStack: 'nodejs'
         targetPort: '3000'
         ingress: '80'
 
