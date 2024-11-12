@@ -38,6 +38,7 @@ stages:
   - job: Build
     displayName: Build
     pool:
+      name: myprivate-pool
       vmImage: ubuntu-latest
     steps:
     - task: AzureContainerApps@1
