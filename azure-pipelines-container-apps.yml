@@ -16,6 +16,10 @@ resources:
 variables:
   tag: '$(Build.BuildId)'
 
+pool:
+  name: myprivate-pool
+  vmImage: $(vmImageName)
+
 stages:
 - stage: Build
   displayName: Build image
