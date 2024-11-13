@@ -31,8 +31,6 @@ pool:
   name: myprivate-pool
   vmImage: $(vmImageName)
 
-
-
 stages:
 - stage: Build1
   displayName: Works Build and deploy specific image with AzurecontainerApps@1
@@ -58,6 +56,8 @@ stages:
         targetPort: '3000'
         ingress: 'external'
         location: 'eastus'
+        minReplica: 3
+        maxReplica: 4
 
 - stage: Build2
   displayName: Deploy image with no image AzurecontainerApps@1
@@ -83,6 +83,8 @@ stages:
         targetPort: '3000'
         ingress: 'external'
         location: 'eastus'
+        minReplica: 2
+        maxReplica: 3
 
 
 - stage: Build3
@@ -118,10 +120,8 @@ stages:
           location=eastus
           containerRegistryName=dnstools
           containerImage=$(containerRegistry)/$(imageRepository):$(tag)
-          minReplica=0
-          maxReplica=1
-
- 
+          minReplica=1
+          maxReplica=2
   # add new job that deploy to container app
   # - job: Deploy
   #   displayName: Deploy dnstools-test2

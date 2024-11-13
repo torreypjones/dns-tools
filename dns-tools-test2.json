@@ -1,4 +1,8 @@
 // root [ /mnt/tjones/git/dns-tools ]# az deployment group create -g Example_pipelines --name dns-tools-test2 --template-file=dns-tools-test2.json --parameters "location=eastus" containerRegistryName=dnstools containerImage=dnstools.azurecr.io/dnstools:21 minReplica=0 maxReplica=1
+// root [ /mnt/tjones/git/dns-tools ]# az deployment group create -g Example_pipelines --name dns-tools-test3 --template-file=dns-tools-test2.json --parameters "location=eastus" containerAppName=az-cli-deployment-group-create containerRegistryName=dnstools containerImage=dnstools.azurecr.io/dnstools:21 minReplica=0 maxReplica=1
+// Name             State      Timestamp                         Mode         ResourceGroup
+// ---------------  ---------  --------------------------------  -----------  -----------------
+// dns-tools-test3  Succeeded  2024-11-12T04:32:51.389745+00:00  Incremental  Example_pipelines
 {
     "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
     "contentVersion": "1.0.0.0",
@@ -143,6 +147,7 @@
         "properties": {
           "managedEnvironmentId": "[resourceId('Microsoft.App/managedEnvironments', parameters('containerAppEnvName'))]",
           "configuration": {
+            "activeRevisionsMode": "Multiple",
             "ingress": {
               "external": true,
               "targetPort": 3000,
